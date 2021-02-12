@@ -1,16 +1,32 @@
 class Perceptron:
-    
+    """ Class that defines a single Perceptron  with a list of the given weights an the input biases
+    """
     def __init__(self,inputsize, list_weights, biases):
         self.weights =list_weights
         self.biases = biases
         
     def activation(self, weighted_sum):
+        """ Implements the step functon in order to define the the output of a percceptron
+
+        Args:
+            weighted_sum (Int): sum of the weights multiplied by the inputs.
+
+        Returns:
+            Bool: 0 or 1
+        """
         #return 0 if weighted_sum < self.biases else 1 
         return 0 if (weighted_sum + self.biases)< 0 else 1
-    # TODO implement biase and not threshold. 
     # Bias = -threshold and the activation function wold return 0 if weighted_sum(weight *x + b)
     
     def calculate(self, inputs:[bool]):
+        """Calculate the output of a perceptron given a list of inputs
+
+        Args:
+            inputs ([bool]): all possible combination of inputs of n x_inputs(x1, x2, etc)
+
+        Returns:
+            [type]: [description]
+        """
         w_som = 0
         outputs = []
         for row in range(len(inputs)):
@@ -18,10 +34,10 @@ class Perceptron:
                 weight = self.weights[i] # get weight 
                 x = inputs[row][i] # get x
                 
-                w_som += (weight*x)
-            output = self.activation(w_som)
-            outputs.append(output)
-            w_som = 0
+                w_som += (weight*x) # increment w_som with the multiplication of weighti and xi
+            output = self.activation(w_som) # apply the step function to w_Som
+            outputs.append(output) # ad output ot list outputs
+            w_som = 0 # reset w_Som to 0
             #print(outputs)
         return outputs
     
@@ -31,8 +47,9 @@ class Perceptron:
 class PerceptonLayer:
     
     def __init__(self):
-        self.n_perceptrons = []
-        
+        self.n_perceptrons = [] # list of Perceptrons objects
+    
+    #Setters and Getters
     def SetPerceptrons(self, p):
         self.n_perceptrons.append(p)
     
@@ -51,10 +68,10 @@ class PerceptonNetwork:
         for layer in self.n_layers: # for each layer
             input_next_layer = []
             for p in layer.getPerceptrons(): # for each perceptron
-                g = p.calculate(input_arr)
-                input_next_layer.append(g)
+                g = p.calculate(input_arr) # get the outpout 
+                input_next_layer.append(g) # ad to list
 
-            # TRANSPOSE A 2D ARRAY
+            # TRANSPOSE input_next_layer
             transposed_input_next_layer_arr = []
             for i in range(len(input_next_layer[0])):
                 tmp = []
@@ -62,10 +79,6 @@ class PerceptonNetwork:
                     tmp.append(input_next_layer[inputs][i])
                 transposed_input_next_layer_arr.append(tmp)
             
-            input_arr = transposed_input_next_layer_arr
+            input_arr = transposed_input_next_layer_arr # add as input_arr to be used as input for the next layer
         return input_arr
 
-
-    # TODO 
-    # finish test 
-    # DOCUMENTATION 
