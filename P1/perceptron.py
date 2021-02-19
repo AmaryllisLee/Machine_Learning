@@ -1,9 +1,10 @@
 class Perceptron:
-    """ Class that defines a single Perceptron  with a list of the given weights an the input biases
+    """ Class that defines a single Perceptron  with a list of the given weights,the input biases and what type of lagic gate it is.
     """
-    def __init__(self, list_weights, biases):
+    def __init__(self,type_logic,  list_weights, biases):
         self.weights =list_weights
         self.biases = biases
+        self.type_logic = type_logic
         
     def activation(self, weighted_sum):
         """ Implements the step functon in order to define the the output of a percceptron
@@ -40,7 +41,7 @@ class Perceptron:
         return output
     
     def __str__(self):
-        return ("Weights: {}" + "\n" + "Biase/Threshold {}").format(self.weights, self.biases)
+        return ("Type Perceptron: {}" + "\n" +"Weights: {}" + "\n" + "Biase/Threshold {}").format(self.type_logic, self.weights, self.biases)
 
 class PerceptonLayer:
     
@@ -66,7 +67,10 @@ class PerceptonLayer:
             input_next_layer.append(g) # ad to list
         return input_next_layer
 
-
+    def __str__(self):
+        layer_size = len(self.n_perceptrons)
+        perceptrons = [i.type_logic for i in self.n_perceptrons]
+        return ( 'Size of layer is {} perceptrons' + '\n' + 'The perceptrons are {}').format(layer_size, perceptrons)
 class PerceptonNetwork:
     
     def __init__(self):
