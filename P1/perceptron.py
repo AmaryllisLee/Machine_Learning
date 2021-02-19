@@ -1,7 +1,7 @@
 class Perceptron:
     """ Class that defines a single Perceptron  with a list of the given weights an the input biases
     """
-    def __init__(self,inputsize, list_weights, biases):
+    def __init__(self, list_weights, biases):
         self.weights =list_weights
         self.biases = biases
         
@@ -27,19 +27,17 @@ class Perceptron:
         Returns:
             [type]: [description]
         """
+
         w_som = 0
         outputs = []
-        for row in range(len(inputs)):
-            for i in range(len(inputs[row])):
-                weight = self.weights[i] # get weight 
-                x = inputs[row][i] # get x
-                
-                w_som += (weight*x) # increment w_som with the multiplication of weighti and xi
-            output = self.activation(w_som) # apply the step function to w_Som
-            outputs.append(output) # ad output ot list outputs
-            w_som = 0 # reset w_Som to 0
+        for i in range(len(inputs)):# iterate through the index inputs e.g [0,0]
+            weight = self.weights[i] # get weight 
+            x = inputs[i] # get x
+
+            w_som += (weight*x) # increment w_som with the multiplication of weighti and xi
+        output = self.activation(w_som) # apply the step function to w_Som
             #print(outputs)
-        return outputs
+        return output
     
     def __str__(self):
         return ("Weights: {}" + "\n" + "Biase/Threshold {}").format(self.weights, self.biases)
@@ -55,6 +53,19 @@ class PerceptonLayer:
     
     def getPerceptrons(self):
         return self.n_perceptrons
+    
+    def get_output(self, input_arr):
+        """Calculate the output for each perceptron in n_perceptron
+
+        Returns:
+            [int]: lsit of containing the outputs of each perceptron in 0 or 1
+        """
+        input_next_layer = []
+        for p in self.n_perceptrons: # for each perceptron
+            g = p.calculate(input_arr) # get the outpout 
+            input_next_layer.append(g) # ad to list
+        return input_next_layer
+
 
 class PerceptonNetwork:
     
@@ -66,19 +77,7 @@ class PerceptonNetwork:
         
     def feed_forward(self, input_arr):
         for layer in self.n_layers: # for each layer
-            input_next_layer = []
-            for p in layer.getPerceptrons(): # for each perceptron
-                g = p.calculate(input_arr) # get the outpout 
-                input_next_layer.append(g) # ad to list
-
-            # TRANSPOSE input_next_layer
-            transposed_input_next_layer_arr = []
-            for i in range(len(input_next_layer[0])):
-                tmp = []
-                for inputs in range(len(input_next_layer)):
-                    tmp.append(input_next_layer[inputs][i])
-                transposed_input_next_layer_arr.append(tmp)
-            
-            input_arr = transposed_input_next_layer_arr # add as input_arr to be used as input for the next layer
+            input_next_layer = layer.get_output(input_arr) # calculate the outputs of each perceptron in layer
+            input_arr = input_next_layer# set input_next_layer as input_arr to be used as input for the next layer
         return input_arr
 
