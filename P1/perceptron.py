@@ -15,8 +15,7 @@ class Perceptron:
         Returns:
             Bool: 0 or 1
         """
-        #return 0 if weighted_sum < self.biases else 1 
-        return 0 if (weighted_sum + self.biases)< 0 else 1
+        return 0 if (weighted_sum + self.biases) < 0 else 1
     # Bias = -threshold and the activation function wold return 0 if weighted_sum(weight *x + b)
     
     def calculate(self, inputs:[bool]):
@@ -43,7 +42,7 @@ class Perceptron:
     def __str__(self):
         return ("Type Perceptron: {}" + "\n" +"Weights: {}" + "\n" + "Biase/Threshold {}").format(self.type_logic, self.weights, self.biases)
 
-class PerceptonLayer:
+class PerceptronLayer:
     
     def __init__(self):
         self.n_perceptrons = [] # list of Perceptrons objects

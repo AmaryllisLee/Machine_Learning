@@ -23,26 +23,6 @@ class Neuron:
         output = self.activation(w_som) # apply the step function to w_Som
         return output
     
-    #TODO check if this is necessary
-    # def update(self, input_arr, output, n):
-    #     y = self.calculate_output(input_arr)
-    #     # calculate error e = d - y
-    #     e = y - output
-    #     self.sum_error += e # Σ | d – y | voor error()
-
-    #     # calculate new weights =>  w' = w + Δw
-    #     for w in range(len(self.weights)):
-    #         # calculate difference weight => Δw = η ∙ e ∙ x 
-    #         diff_w = n * e * input_arr[w]
-    #         self.weights[w] = self.weights[w] + diff_w
-
-    #     # calculate new baise Δb = η ∙ e
-    #     diff_b = n * e 
-    #     # calculate new biase
-    #     self.biase = self.biase + diff_b
-
-    #     # TODO iter and error_sum documenteren 
-    #     self.iter += 1
     
     def __str__(self):
         return ("Weights: {}" + "\n" + "Biase/Threshold {}").format(self.weights, self.bias)
