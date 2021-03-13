@@ -20,14 +20,13 @@ class Neuron:
 
     def calculate_output(self, input_arr):
         w_som = 0
-
-        
         for i in range(len(input_arr)):# iterate through the index inputs e.g [0,0]
             weight = self.weights[i] # get weight 
             x = input_arr[i] # get x
 
             w_som += (weight*x) # increment w_som with the multiplication of weighti and xi
         self.output = self.activation(w_som) # apply the step function to w_Som
+        return self.output
        
 
     def gradient(self):
@@ -42,9 +41,16 @@ class Neuron:
         
         self.bias = self.bias - self.n * self.error # b'j = bj – Δbj, Δbj = η ∙ Δj
     
-    def cost(self, ):
-        "Calculating the total loss by using the cost function Mean Squared error"
+    def cost(self, input_arr, targets):
+        "Calculating the total loss of a neuron by using the cost function Mean Squared error"
         # Formula of the MSE =  Σ |d - y|/n # TODO example of cost
+        loss = 0
+        for i  in input_arr:
+            output = self.calculate_output(i)
+            for target in targets:
+                loss += (target - output)**2
+        return loss/ len(input_arr) 
+            
 
     
 
@@ -59,8 +65,8 @@ class HiddenNeuron(Neuron):
 
     def set_error(self, weights_next_layer, error_next_layer):
         "Bereken de error van een hidden layer"
-        errors =  [(weights_next_layer[i] * error_next_layer[i]) for i in range(weights_next_layer)]
-        self.error = self.output * ( 1- self.output) * errors
+        errors_sum =  sum([(weights_next_layer[i] * error_next_layer[i]) for i in range(len(weights_next_layer))])
+        self.error = self.output * ( 1- self.output) * errors_sum
        
 
 class OutputNeuron(Neuron):
@@ -90,84 +96,94 @@ class NeuronLayer:
             [int]: lsit of containing the outputs of each perceptron in 0 or 1
         """
         input_next_layer = []
-        for p in self.n_neurons: # for each perceptron
-            input_next_layer.append(p.calculate_output(input_arr)) # get the outpout
+        for n in self.n_neurons: # for each neuron
+            input_next_layer.append(n.calculate_output(input_arr)) # get the outpout
         return input_next_layer 
     
-    def set_error_output(self, d):
-        for n in self.n_neurons:
-            n.set_error(d)
-            self.errors.append(n.error)
-    
-    def set_error_hidden(self, next_layer):
-        for neuron in next_layer.neurons:
-            neuron.set_error()
-            self.errors.append(neuron.error)
-
-        
-    
-    def update_layer(self, input_arr):
-        for n in self.n_neurons:
-            n.update(input_arr)
 
     def __str__(self):
         layer_size = len(self.n_neurons)
         return ( 'Size of layer is {} perceptrons').format(layer_size)
+
+class HiddenLayer(NeuronLayer):
+    
+    def __init__(self):
+        super().__init__()
+
+    def set_errors(self, next_layer):
+        "Bereken de error van een hidden layer"
+        #set neurons
+        for index in range(len(self.n_neurons)):
+            layer_weights_i = [n.weights[index] for n in next_layer.n_neurons] # get the weights of the following layer
+            # Set error for neuron "index"
+            self.n_neurons[index].set_error(layer_weights_i, next_layer.errors)
+
+        self.errors = [neuron.error for neuron in self.n_neurons]
+
+class OutputLayer(NeuronLayer):
+    def __init__(self):
+        super().__init__()
+    
+    def set_errors(self, d):
+        """Bereken de error van de outputlayer
+        """
+        #Set neurons 
+        for i, neuron in enumerate(self.n_neurons):
+            neuron.set_error(d[i])
+
+        self.errors = [neuron.error for neuron in self.n_neurons]
 
 
 class NeuronNetwork:
 
     def __init__(self):
         self.n_layers = []
-        self.a = [] # list containing the output of the neurons: e.g ao, af,ag,am, an
 
     def feed_forward(self, input_arr):
         for layer in self.n_layers: # for each layer
             input_next_layer = layer.get_output(input_arr) # calculate the outputs of each perceptron in layer
-            self.a.append(input_next_layer)
             input_arr = input_next_layer# set input_next_layer as input_arr to be used as input for the next layer
-        # return input_arr
+        return input_arr
     
-    def set_error(self):
+    def set_errors(self, d):
+        for index, layer in enumerate(self.n_layers[::-1]): # iterating through layer from a descending order ( reverse n_layers )
+            if index == 0: # check if layer is outputLayer
+                layer.set_errors(d)
+            else:
+                layer.set_errors(self.n_layers[::-1][index-1])
+
+    def update(self, training_example):
+        inputs = training_example
         for layer in self.n_layers:
-            for neuron in layer.n_neurons:
-                neuron.error = 0
-    
-    def MSE(self, training_examples,  targets):
+            for neuron_layer in layer.n_neurons:
+                neuron_layer.update(inputs)
+            inputs = [n.output for n in layer.n_neurons]
+
+
+    def cost(self, training_examples,  targets):
         loss=0
-        loss_lst = []
         for example   in training_examples:
-            self.feed_forward(example)
-            for i in range(len(targets)):
-                loss  +=  (targets[i] - self.a[i])**2
-            loss_lst.append(loss/len(targets))
-        return sum(loss_lst)/len(loss_lst)
+            output = self.feed_forward(example)
+            for target in targets:
+                for i in range(len(target)): 
+                    loss  +=  (target[i] - output[i])**2
+        return loss/len(training_examples)
             
 
 
     def train(self, training_examples, targets, epochs= 1000):
         "Implementin backpropagation"
         epoch = 0
-        while  epoch <   epochs: #iterating through 100 epoch  TODO change for stopcoondition
-            for example in training_examples:
-                #feedforward
-                self.feed_forward(example)
-
-                # set errors
-                errors  = []
-                for i in range(len(reversed(self.layers))):
-                    if i == 0: # check if layer is outputlayer
-                        self.n_layers[-1].set_error_output(targets[i])
-                    self.n_layers[i-1].set_error_hidden(self.n_layers[i])
-
-                # Update
-                for layer in reversed(self.layers):
-                    layer.update(example)
+        while  epoch <  epochs: #iterating through 1000 epoch  TODO change for stopcoondition
+            for index, example in enumerate(training_examples): # iterating through each training example
+                self.feed_forward(example) # predict the outputs of each layer with feedforward
+                self.set_errors(targets[index])
+                self.update(example) 
             epoch +=1
-            #cost
-            print(f"C(w) =  {self.MSE(training_examples, targets)}")
+        print(f"C(w) =  {self.cost(training_examples, targets)}")
 
-#
+
+        
 #  TODO : make adjustments to MSE, train ( specifically the set errors  part)
 #  TODO (goal):  Mulitilayer test run and i correct 
 # TODO :   implement part 18 and 19 of assignment: classification of the iris and the Digit dataset
