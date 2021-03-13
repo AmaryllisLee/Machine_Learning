@@ -183,29 +183,11 @@ class NeuronNetwork:
         print(f"C(w) =  {self.cost(training_examples, targets)}")
 
 
-        
-#  TODO : make adjustments to MSE, train ( specifically the set errors  part)
-#  TODO (goal):  Mulitilayer test run and i correct 
+
 # TODO :   implement part 18 and 19 of assignment: classification of the iris and the Digit dataset
 
 
         
-
-
-
-
-        
-    # def train(self,training_examples):
-    #     cost = None
-    #     while cost < 0.1:
-    #         for example in training_examples:
-    #             self.feed_forward(training_examples)
-    #             self.set_error()
-    #             self.update()
-            
-    #         cost = self.MSE(training_examples) 
-        
-
         
 
     
